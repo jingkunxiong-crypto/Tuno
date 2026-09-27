@@ -6,9 +6,10 @@ Tuno 是一个面向本地音乐收藏的开源播放器项目，包含 Android 
 
 ## 界面预览
 
-| Android | Windows 音乐库 | Windows 播放页与歌词 |
-| --- | --- | --- |
-| ![Tuno Android 音乐库](docs/screenshots/android-library.png) | ![Tuno Windows 音乐库](docs/screenshots/windows-home.png) | ![Tuno Windows 播放页与歌词](docs/screenshots/windows-player.png) |
+| Android | Windows |
+| --- | --- |
+| ![Tuno Android 音乐库](docs/screenshots/android-library.png) | ![Tuno Windows 音乐库](docs/screenshots/windows-home.png) |
+| ![Tuno Android 播放页](docs/screenshots/android-player.png) | ![Tuno Windows 播放页与歌词](docs/screenshots/windows-player.png) |
 
 Android 播放页、同步歌词和菜单等更多界面见源码中的页面实现；Windows 端的播放页、队列和歌词布局见 [windows/README.md](windows/README.md)。
 
