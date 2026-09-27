@@ -1,0 +1,31 @@
+<resources>
+    <string name="tuno_music">音乐</string>
+    <string name="tuno_playlists">歌单</string>
+    <string name="tuno_library">我的音乐</string>
+    <string name="tuno_library_subtitle">收藏在本地，随时开听。</string>
+    <string name="tuno_playlists_title">我的歌单</string>
+    <string name="tuno_playlists_subtitle">把喜欢的歌，放在一起。</string>
+    <string name="tuno_song_count">本地共 %1$d 首歌曲</string>
+    <string name="tuno_shuffle">随机播放</string>
+    <string name="tuno_empty_music">从第一首歌开始</string>
+    <string name="tuno_empty_music_hint">将 MP3 等音频存入设备的 Music 文件夹，扫描后就能在这里找到。</string>
+    <string name="tuno_scan">扫描本地音乐</string>
+    <string name="tuno_no_results">没有找到匹配的歌曲</string>
+    <string name="tuno_no_results_hint">试试其他歌名、歌手或专辑名称。</string>
+    <string name="tuno_empty_playlists">留个位置，给喜欢的歌</string>
+    <string name="tuno_no_playlist_results">没有找到匹配的歌单</string>
+    <string name="tuno_no_playlist_results_hint">试试其他歌单名称。</string>
+    <string name="tuno_empty_playlists_hint">新建一张歌单，收集适合一起听的歌曲。</string>
+    <string name="tuno_new_playlist">新建歌单</string>
+    <string name="tuno_local_audio">本地音频</string>
+    <string name="tuno_browse">浏览音乐库</string>
+    <string name="tuno_lyrics">歌词</string>
+    <string name="tuno_import_lyrics">导入</string>
+    <string name="tuno_choose_lrc">选择 LRC 文件</string>
+    <string name="tuno_no_lyrics">还没有歌词</string>
+    <string name="tuno_no_lyrics_hint">为这首歌导入带时间轴的 .lrc 文件。Tuno 也会读取同名歌词文件和音频内嵌歌词。</string>
+    <string name="tuno_lyrics_loaded">歌词已导入</string>
+    <string name="tuno_lyrics_invalid">这个文件中没有可读取的歌词</string>
+    <string name="tuno_expand_lyrics">展开歌词</string>
+    <string name="tuno_collapse_lyrics">收起歌词</string>
+</resources>

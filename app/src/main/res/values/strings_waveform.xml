@@ -1,0 +1,4 @@
+<resources>
+    <string name="tuno_waveform_seek">歌曲波形进度，拖动调整播放位置</string>
+    <string name="tuno_speed_control">播放速度</string>
+</resources>

@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/albums_coordinator"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <org.fossify.commons.views.MyAppBarLayout
+        android:id="@+id/albums_appbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/albums_toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize" android:layout_marginHorizontal="16dp" android:layout_marginBottom="12dp"
+            android:background="@color/color_primary"
+            app:title="@string/artist"
+            app:titleTextAppearance="@style/AppTheme.ActionBar.TitleTextStyle" />
+
+    </org.fossify.commons.views.MyAppBarLayout>
+
+    <RelativeLayout
+        android:id="@+id/albums_holder"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true"
+        android:scrollbars="none"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <com.qtalk.recyclerviewfastscroller.RecyclerViewFastScroller
+            android:id="@+id/albums_fastscroller"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_above="@+id/current_track_bar">
+
+            <org.fossify.commons.views.MyRecyclerView
+                android:id="@+id/albums_list"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:clipToPadding="false" android:paddingHorizontal="16dp" android:paddingTop="8dp"
+                android:layoutAnimation="@anim/layout_animation"
+                app:layoutManager="org.fossify.commons.views.MyLinearLayoutManager" />
+
+        </com.qtalk.recyclerviewfastscroller.RecyclerViewFastScroller>
+
+        <include
+            android:id="@+id/current_track_bar"
+            layout="@layout/view_current_track_bar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true" android:layout_margin="12dp" />
+
+    </RelativeLayout>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

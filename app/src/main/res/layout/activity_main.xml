@@ -1,0 +1,215 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main_coordinator"
+    android:background="@color/tuno_background"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <org.fossify.commons.views.MySearchMenu
+        android:id="@+id/main_menu"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <RelativeLayout
+        android:id="@+id/main_nested_scrollview"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true"
+        android:scrollbars="none"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/main_holder"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <LinearLayout
+                android:id="@+id/library_header"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginHorizontal="16dp"
+                android:layout_marginTop="8dp"
+                android:background="@drawable/tuno_home_glass"
+                android:paddingStart="20dp"
+                android:paddingTop="18dp"
+                android:paddingEnd="20dp"
+                android:paddingBottom="16dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="TUNO"
+                    android:letterSpacing="0.22"
+                    android:textSize="10sp"
+                    android:textColor="#B3FFFFFF"
+                    android:layout_marginBottom="8dp"
+                    android:importantForAccessibility="no" />
+
+                                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:orientation="horizontal" android:gravity="center_vertical">
+                    <TextView android:id="@+id/library_title"
+                        android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content"
+                        android:fontFamily="sans-serif-medium" android:text="@string/tuno_library"
+                        android:textColor="@color/tuno_ink" android:textSize="24sp" />
+                    <com.google.android.material.tabs.TabLayout android:id="@+id/main_tabs_holder"
+                        android:layout_width="128dp" android:layout_height="48dp"
+                        app:tabMode="fixed" app:tabGravity="fill" app:tabTextAppearance="@style/TunoNavLabel"
+                        app:tabMinWidth="0dp" app:tabPaddingStart="8dp" app:tabPaddingEnd="8dp"
+                        app:tabIndicatorHeight="2dp" app:tabIndicatorFullWidth="false"
+                        app:tabRippleColor="@android:color/transparent" />
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/library_subtitle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:text="@string/tuno_library_subtitle"
+                    android:textColor="@color/tuno_muted"
+                    android:textSize="12sp" />
+
+                <HorizontalScrollView
+                    android:id="@+id/library_categories"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:fillViewport="true"
+                    android:scrollbars="none">
+                    <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:orientation="horizontal">
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/browse_albums" style="@style/TunoCategoryButton"
+                            android:layout_width="0dp" android:layout_weight="1" android:layout_height="52dp"
+                            android:text="@string/albums" app:icon="@drawable/ic_album_vector" />
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/browse_artists" style="@style/TunoCategoryButton"
+                            android:layout_width="0dp" android:layout_weight="1" android:layout_height="52dp"
+                            android:layout_marginStart="8dp"
+                            android:text="@string/artists" app:icon="@drawable/ic_person_vector" />
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/browse_folders" style="@style/TunoCategoryButton"
+                            android:layout_width="0dp" android:layout_weight="1" android:layout_height="52dp"
+                            android:layout_marginStart="8dp"
+                            android:text="@string/folders" app:icon="@drawable/ic_folders_vector" />
+                    </LinearLayout>
+                </HorizontalScrollView>
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/new_playlist_button"
+                    style="@style/TunoCategoryButton"
+                    android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:text="@string/tuno_new_playlist"
+                    android:visibility="gone"
+                    app:icon="@drawable/ic_playlist_vector" />
+            </LinearLayout>
+
+            <com.google.android.material.progressindicator.LinearProgressIndicator
+                android:id="@+id/loading_progress_bar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                android:indeterminate="true"
+                android:visibility="gone"
+                app:hideAnimationBehavior="outward"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:showAnimationBehavior="inward"
+                app:showDelay="250"
+                tools:visibility="visible" />
+
+            <org.fossify.commons.views.MyViewPager
+                android:id="@+id/view_pager"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                app:layout_constraintBottom_toTopOf="@+id/current_track_bar"
+                app:layout_constraintTop_toBottomOf="@id/library_header" />
+
+            <include
+                android:id="@+id/current_track_bar"
+                layout="@layout/view_current_track_bar"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="16dp"
+                android:layout_marginVertical="8dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent" />
+
+
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/sleep_timer_holder"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@color/default_background_color"
+                android:clickable="true"
+                android:visibility="gone"
+                app:layout_constraintBottom_toTopOf="@+id/current_track_bar"
+                app:layout_constraintEnd_toEndOf="parent"
+                tools:visibility="visible">
+
+                <ImageView
+                    android:id="@+id/sleep_timer_divider_top"
+                    android:layout_width="0dp"
+                    android:layout_height="1px"
+                    android:background="@color/divider_grey"
+                    app:layout_constraintBottom_toTopOf="@+id/sleep_timer_stop"
+                    app:layout_constraintEnd_toEndOf="@+id/sleep_timer_stop"
+                    app:layout_constraintStart_toStartOf="@+id/sleep_timer_label" />
+
+                <ImageView
+                    android:id="@+id/sleep_timer_divider_start"
+                    android:layout_width="1px"
+                    android:layout_height="0dp"
+                    android:background="@color/divider_grey"
+                    app:layout_constraintBottom_toBottomOf="@+id/sleep_timer_stop"
+                    app:layout_constraintStart_toStartOf="@+id/sleep_timer_label"
+                    app:layout_constraintTop_toTopOf="@+id/sleep_timer_stop" />
+
+                <org.fossify.commons.views.MyTextView
+                    android:id="@+id/sleep_timer_label"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:paddingStart="@dimen/normal_margin"
+                    android:paddingEnd="@dimen/normal_margin"
+                    android:text="@string/sleep_timer"
+                    android:textSize="@dimen/big_text_size"
+                    app:layout_constraintBottom_toBottomOf="@+id/sleep_timer_stop"
+                    app:layout_constraintEnd_toStartOf="@+id/sleep_timer_value"
+                    app:layout_constraintTop_toTopOf="@+id/sleep_timer_stop" />
+
+                <org.fossify.commons.views.MyTextView
+                    android:id="@+id/sleep_timer_value"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="00:00"
+                    android:textSize="@dimen/big_text_size"
+                    app:layout_constraintBottom_toBottomOf="@+id/sleep_timer_stop"
+                    app:layout_constraintEnd_toStartOf="@+id/sleep_timer_stop"
+                    app:layout_constraintTop_toTopOf="@+id/sleep_timer_stop"
+                    tools:ignore="HardcodedText" />
+
+                <ImageView
+                    android:id="@+id/sleep_timer_stop"
+                    android:layout_width="@dimen/normal_icon_size"
+                    android:layout_height="@dimen/normal_icon_size"
+                    android:layout_marginStart="@dimen/tiny_margin"
+                    android:layout_marginEnd="@dimen/tiny_margin"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:padding="@dimen/medium_margin"
+                    android:src="@drawable/ic_cross_vector"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </RelativeLayout>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

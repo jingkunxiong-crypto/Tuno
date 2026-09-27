@@ -1,0 +1,60 @@
+<resources>
+    <color name="tuno_background">#F6F7FB</color>
+    <color name="tuno_surface">#FFFFFF</color>
+    <color name="tuno_soft_surface">#EBE8F6</color>
+    <color name="tuno_accent">#FFFFFF</color>
+    <color name="tuno_ink">#222437</color>
+    <color name="tuno_muted">#686D80</color>
+    <color name="tuno_line">#E3E5ED</color>
+    <string name="tuno_music">Music</string>
+    <string name="tuno_playlists">Playlists</string>
+    <string name="tuno_library">Your music</string>
+    <string name="tuno_library_subtitle">On your device. Always with you.</string>
+    <string name="tuno_playlists_title">Your playlists</string>
+    <string name="tuno_playlists_subtitle">A place for every kind of listening.</string>
+    <string name="tuno_song_count">%1$d songs on this device</string>
+    <string name="tuno_shuffle">Shuffle</string>
+    <string name="tuno_empty_music">Your music starts here</string>
+    <string name="tuno_empty_music_hint">Save MP3 or other audio files in your device’s Music folder, then scan your library.</string>
+    <string name="tuno_scan">Scan music</string>
+    <string name="tuno_no_results">No matching songs</string>
+    <string name="tuno_no_results_hint">Try another song title, artist or album.</string>
+    <string name="tuno_empty_playlists">Make room for your favorites</string>
+    <string name="tuno_no_playlist_results">No matching playlists</string>
+    <string name="tuno_no_playlist_results_hint">Try another playlist name.</string>
+    <string name="tuno_empty_playlists_hint">Create a playlist and add the songs you want to hear together.</string>
+    <string name="tuno_new_playlist">New playlist</string>
+    <string name="tuno_local_audio">Local audio</string>
+    <string name="tuno_browse">Browse library</string>
+    <string name="tuno_lyrics">Lyrics</string>
+    <string name="tuno_import_lyrics">Import</string>
+    <string name="tuno_choose_lrc">Choose LRC file</string>
+    <string name="tuno_no_lyrics">No lyrics yet</string>
+    <string name="tuno_no_lyrics_hint">Import a time-synced .lrc file for this song. Tuno also reads matching sidecar files and embedded lyrics.</string>
+    <string name="tuno_lyrics_loaded">Lyrics imported</string>
+    <string name="tuno_lyrics_invalid">This file does not contain readable lyrics</string>
+    <string name="tuno_expand_lyrics">Expand lyrics</string>
+    <string name="tuno_collapse_lyrics">Collapse lyrics</string>
+    <style name="TunoCategoryButton" parent="Widget.MaterialComponents.Button.TextButton">
+        <item name="android:textColor">@color/tuno_ink</item>
+        <item name="android:textSize">13sp</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:minHeight">48dp</item>
+        <item name="android:insetTop">2dp</item>
+        <item name="android:insetBottom">2dp</item>
+        <item name="android:paddingLeft">12dp</item>
+        <item name="android:paddingRight">12dp</item>
+        <item name="backgroundTint">#16FFFFFF</item>
+        <item name="strokeColor">#30FFFFFF</item>
+        <item name="strokeWidth">1dp</item>
+        <item name="rippleColor">@android:color/transparent</item>
+        <item name="cornerRadius">20dp</item>
+        <item name="iconTint">@color/tuno_accent</item>
+        <item name="iconSize">16dp</item>
+    </style>
+    <style name="TunoNavLabel" parent="TextAppearance.MaterialComponents.Caption">
+        <item name="android:textSize">12sp</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+    </style>
+</resources>

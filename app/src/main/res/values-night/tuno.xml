@@ -1,0 +1,9 @@
+<resources>
+    <color name="tuno_background">#181A1E</color>
+    <color name="tuno_surface">#25272C</color>
+    <color name="tuno_soft_surface">#303138</color>
+    <color name="tuno_accent">#FFFFFF</color>
+    <color name="tuno_ink">#F0EFF7</color>
+    <color name="tuno_muted">#A5A9BB</color>
+    <color name="tuno_line">#343947</color>
+</resources>

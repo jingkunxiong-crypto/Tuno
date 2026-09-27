@@ -1,0 +1,12 @@
+.packages/
+.build-profile/
+dist/
+**/bin/
+**/obj/
+verification/library-*/
+verification/lyrics-*/
+verification/ui-library/
+verification/ui-stage3/
+verification/*.wav
+verification/*.mp3
+

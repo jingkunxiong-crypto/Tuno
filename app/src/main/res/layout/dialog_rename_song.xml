@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/rename_song_scrollview"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:id="@+id/rename_song_holder"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingTop="@dimen/medium_margin">
+
+        <org.fossify.commons.views.MyTextInputLayout
+            android:id="@+id/title_hint"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/activity_margin"
+            android:layout_marginTop="@dimen/small_margin"
+            android:layout_marginEnd="@dimen/activity_margin"
+            android:layout_marginBottom="@dimen/activity_margin"
+            android:hint="@string/title">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textCapWords"
+                android:singleLine="true"
+                android:textCursorDrawable="@null"
+                android:textSize="@dimen/bigger_text_size" />
+
+        </org.fossify.commons.views.MyTextInputLayout>
+
+        <org.fossify.commons.views.MyTextInputLayout
+            android:id="@+id/artist_hint"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/activity_margin"
+            android:layout_marginEnd="@dimen/activity_margin"
+            android:layout_marginBottom="@dimen/activity_margin"
+            android:hint="@string/artist">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/artist"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textCapWords"
+                android:singleLine="true"
+                android:textCursorDrawable="@null"
+                android:textSize="@dimen/bigger_text_size" />
+
+        </org.fossify.commons.views.MyTextInputLayout>
+
+        <org.fossify.commons.views.MyTextInputLayout
+            android:id="@+id/album_hint"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/activity_margin"
+            android:layout_marginEnd="@dimen/activity_margin"
+            android:layout_marginBottom="@dimen/activity_margin"
+            android:hint="@string/album">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/album"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textCapWords"
+                android:singleLine="true"
+                android:textCursorDrawable="@null"
+                android:textSize="@dimen/bigger_text_size" />
+
+        </org.fossify.commons.views.MyTextInputLayout>
+
+        <org.fossify.commons.views.MyTextInputLayout
+            android:id="@+id/file_name_hint"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/activity_margin"
+            android:layout_marginEnd="@dimen/activity_margin"
+            android:layout_marginBottom="@dimen/activity_margin"
+            android:hint="@string/filename">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/file_name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textCapWords"
+                android:singleLine="true"
+                android:textCursorDrawable="@null"
+                android:textSize="@dimen/bigger_text_size" />
+
+        </org.fossify.commons.views.MyTextInputLayout>
+
+        <org.fossify.commons.views.MyTextInputLayout
+            android:id="@+id/extension_hint"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/activity_margin"
+            android:layout_marginEnd="@dimen/activity_margin"
+            android:hint="@string/extension">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/extension"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:singleLine="true"
+                android:textCursorDrawable="@null"
+                android:textSize="@dimen/bigger_text_size" />
+
+        </org.fossify.commons.views.MyTextInputLayout>
+    </LinearLayout>
+</ScrollView>

@@ -1,0 +1,609 @@
+package com.example.tuno.activities
+
+import android.content.ActivityNotFoundException
+import android.content.Intent
+import android.content.res.ColorStateList
+import android.graphics.drawable.ColorDrawable
+import android.graphics.drawable.Drawable
+import android.media.AudioManager
+import android.net.Uri
+import android.os.Bundle
+import android.widget.Toast
+import androidx.viewpager.widget.ViewPager
+import com.example.tuno.BuildConfig
+import com.google.android.material.tabs.TabLayout
+import org.fossify.commons.dialogs.FilePickerDialog
+import com.example.tuno.dialogs.GlassRadioGroupDialog
+import org.fossify.commons.extensions.*
+import org.fossify.commons.helpers.*
+import org.fossify.commons.models.FAQItem
+import org.fossify.commons.models.RadioItem
+import org.fossify.commons.models.Release
+import com.example.tuno.R
+import com.example.tuno.adapters.ViewPagerAdapter
+import com.example.tuno.databinding.ActivityMainBinding
+import com.example.tuno.dialogs.NewPlaylistDialog
+import com.example.tuno.dialogs.SelectPlaylistDialog
+import com.example.tuno.dialogs.SleepTimerCustomDialog
+import com.example.tuno.extensions.*
+import com.example.tuno.helpers.*
+import com.example.tuno.helpers.M3uImporter.ImportResult
+import com.example.tuno.models.Events
+import com.example.tuno.playback.CustomCommands
+import org.greenrobot.eventbus.EventBus
+import org.greenrobot.eventbus.Subscribe
+import org.greenrobot.eventbus.ThreadMode
+import java.io.FileOutputStream
+
+class MainActivity : SimpleMusicActivity() {
+    private val PICK_IMPORT_SOURCE_INTENT = 1
+
+    private var bus: EventBus? = null
+    private var storedShowTabs = 0
+    private var storedExcludedFolders = 0
+
+    override var isSearchBarEnabled = true
+
+    private val binding by viewBinding(ActivityMainBinding::inflate)
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(binding.root)
+        config.migrateHomeNavigation()
+        appLaunched(BuildConfig.APPLICATION_ID)
+        setupOptionsMenu()
+        refreshMenuItems()
+        setupEdgeToEdge(
+            padBottomImeAndSystem = listOf(binding.mainHolder)
+        )
+        storeStateVariables()
+        setupTabs()
+        binding.browseAlbums.setOnClickListener { browseLibrary(TAB_ALBUMS) }
+        binding.browseArtists.setOnClickListener { browseLibrary(TAB_ARTISTS) }
+        binding.browseFolders.setOnClickListener { browseLibrary(TAB_FOLDERS) }
+        binding.newPlaylistButton.setOnClickListener { createNewPlaylist() }
+        setupCurrentTrackBar(binding.currentTrackBar.root)
+
+        handlePermission(getPermissionToRequest()) {
+            if (it) {
+                initActivity()
+            } else {
+                toast(org.fossify.commons.R.string.no_storage_permissions)
+                finish()
+            }
+        }
+
+        volumeControlStream = AudioManager.STREAM_MUSIC
+        checkWhatsNewDialog()
+        checkAppOnSDCard()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        handleNotificationIntent(intent)
+        if (storedShowTabs != config.showTabs) {
+            config.lastUsedViewPagerPage = 0
+            recreate()
+            return
+        }
+
+        updateMenuColors()
+        updateTextColors(binding.mainHolder)
+        binding.mainHolder.background = null
+        binding.libraryTitle.setTextColor(getColor(R.color.tuno_ink))
+        binding.librarySubtitle.setTextColor(getColor(R.color.tuno_muted))
+        listOf(binding.browseAlbums, binding.browseArtists, binding.browseFolders, binding.newPlaylistButton).forEach {
+            it.setTextColor(getColor(R.color.tuno_ink))
+        }
+        setupTabColors()
+        val properTextColor = getProperTextColor()
+        val properPrimaryColor = getProperPrimaryColor()
+        binding.sleepTimerHolder.background = ColorDrawable(getProperBackgroundColor())
+        binding.sleepTimerStop.applyColorFilter(properTextColor)
+        binding.loadingProgressBar.setIndicatorColor(properPrimaryColor)
+        binding.loadingProgressBar.trackColor = properPrimaryColor.adjustAlpha(LOWER_ALPHA)
+
+        getAllFragments().forEach {
+            it.setupColors(properTextColor, properPrimaryColor)
+        }
+
+        if (storedExcludedFolders != config.excludedFolders.hashCode()) {
+            refreshAllFragments()
+        }
+    }
+
+    override fun onPostResume() {
+        super.onPostResume()
+        binding.root.background = com.example.tuno.views.HomeGlassDrawable()
+        // Continue the home background through the gesture area, without a separate bottom scrim.
+        window.setBackgroundDrawable(com.example.tuno.views.HomeGlassDrawable())
+        @Suppress("DEPRECATION")
+        window.navigationBarColor = android.graphics.Color.TRANSPARENT
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.P) {
+            @Suppress("DEPRECATION")
+            window.navigationBarDividerColor = android.graphics.Color.TRANSPARENT
+        }
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+            window.isNavigationBarContrastEnforced = false
+        }
+        binding.mainNestedScrollview.background = null
+        binding.mainHolder.background = null
+        binding.mainMenu.background = null
+        binding.mainMenu.requireToolbar().background = null
+        binding.mainMenu.binding.toolbarContainer.background =
+            getDrawable(R.drawable.tuno_home_glass)?.mutate()
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        handleNotificationIntent(intent)
+    }
+
+    override fun onPause() {
+        super.onPause()
+        storeStateVariables()
+        config.lastUsedViewPagerPage = binding.viewPager.currentItem
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        bus?.unregister(this)
+    }
+
+    override fun onBackPressedCompat(): Boolean {
+        return if (binding.mainMenu.isSearchOpen) {
+            binding.mainMenu.closeSearch()
+            true
+        } else {
+            false
+        }
+    }
+
+    private fun refreshMenuItems(position: Int = binding.viewPager.currentItem) {
+        binding.mainMenu.requireToolbar().menu.apply {
+            val tab = getVisibleTabs().getOrElse(position) { TAB_TRACKS }
+            val isPlaylistFragment = tab == TAB_PLAYLISTS
+            findItem(R.id.create_new_playlist).isVisible = isPlaylistFragment
+            findItem(R.id.create_playlist_from_folder).isVisible = isPlaylistFragment
+            findItem(R.id.import_playlist).isVisible = isPlaylistFragment
+            findItem(R.id.more_apps_from_us).isVisible = false
+            updateLibraryHeader(tab)
+        }
+    }
+
+    private fun updateLibraryHeader(tab: Int) {
+        val playlists = tab == TAB_PLAYLISTS
+        binding.libraryTitle.setText(if (playlists) R.string.tuno_playlists_title else R.string.tuno_library)
+        binding.librarySubtitle.setText(if (playlists) R.string.tuno_playlists_subtitle else R.string.tuno_library_subtitle)
+        binding.libraryCategories.beVisibleIf(tab == TAB_TRACKS)
+        binding.newPlaylistButton.beVisibleIf(playlists)
+    }
+
+    private fun browseLibrary(tab: Int) {
+        startActivity(Intent(this, LibraryActivity::class.java).putExtra(LibraryActivity.EXTRA_TAB, tab))
+    }
+
+    private fun setupOptionsMenu() {
+        binding.mainMenu.requireToolbar().popupTheme = R.style.TunoGlassPopupTheme
+        binding.mainMenu.requireToolbar().inflateMenu(R.menu.menu_main)
+        binding.mainMenu.toggleHideOnScroll(false)
+        binding.mainMenu.setupMenu()
+
+        binding.mainMenu.onSearchOpenListener = {
+            binding.libraryHeader.beGone()
+        }
+
+        binding.mainMenu.onSearchClosedListener = {
+            binding.libraryHeader.beVisible()
+            getAllFragments().forEach {
+                it.onSearchClosed()
+            }
+        }
+
+        binding.mainMenu.onSearchTextChangedListener = { text ->
+            getCurrentFragment()?.onSearchQueryChanged(text)
+        }
+
+        binding.mainMenu.requireToolbar().setOnMenuItemClickListener { menuItem ->
+            when (menuItem.itemId) {
+                R.id.sort -> showSortingDialog()
+                R.id.rescan_media -> refreshAllFragments(showProgress = true)
+                R.id.sleep_timer -> showSleepTimer()
+                R.id.create_new_playlist -> createNewPlaylist()
+                R.id.create_playlist_from_folder -> createPlaylistFromFolder()
+                R.id.import_playlist -> tryImportPlaylist()
+                R.id.equalizer -> launchEqualizer()
+                R.id.more_apps_from_us -> launchMoreAppsFromUsIntent()
+                R.id.settings -> launchSettings()
+                else -> return@setOnMenuItemClickListener false
+            }
+            return@setOnMenuItemClickListener true
+        }
+    }
+
+    private fun updateMenuColors() {
+        binding.mainMenu.updateColors()
+    }
+
+    private fun storeStateVariables() {
+        config.apply {
+            storedShowTabs = showTabs
+            storedExcludedFolders = config.excludedFolders.hashCode()
+        }
+    }
+
+    private fun initActivity() {
+        bus = EventBus.getDefault()
+        bus!!.register(this)
+        // trigger a scan first so that the fragments will accurately reflect the scanning state
+        mediaScanner.scan()
+        initFragments()
+        binding.sleepTimerStop.setOnClickListener { stopSleepTimer() }
+
+        refreshAllFragments()
+    }
+
+    private fun refreshAllFragments(showProgress: Boolean = config.appRunCount == 1) {
+        if (showProgress) {
+            binding.loadingProgressBar.show()
+        }
+
+        handleNotificationPermission { granted ->
+            mediaScanner.scan(progress = showProgress && granted) { complete ->
+                runOnUiThread {
+                    getAllFragments().forEach {
+                        it.setupFragment(this)
+                    }
+
+                    if (complete) {
+                        binding.loadingProgressBar.hide()
+                        withPlayer {
+                            if (currentMediaItem == null) {
+                                maybePreparePlayer()
+                            } else {
+                                sendCommand(CustomCommands.RELOAD_CONTENT)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private fun initFragments() {
+        binding.viewPager.adapter = ViewPagerAdapter(this)
+        binding.viewPager.offscreenPageLimit = (getVisibleTabs().size - 1).coerceAtLeast(1)
+        binding.viewPager.addOnPageChangeListener(object : ViewPager.OnPageChangeListener {
+            override fun onPageScrollStateChanged(state: Int) {}
+
+            override fun onPageScrolled(position: Int, positionOffset: Float, positionOffsetPixels: Int) {}
+
+            override fun onPageSelected(position: Int) {
+                binding.mainTabsHolder.getTabAt(position)?.select()
+                getAllFragments().forEach {
+                    it.finishActMode()
+                }
+                refreshMenuItems(position)
+            }
+        })
+        binding.viewPager.currentItem = config.lastUsedViewPagerPage.coerceIn(0, getVisibleTabs().lastIndex)
+        binding.mainTabsHolder.getTabAt(binding.viewPager.currentItem)?.select()
+        refreshMenuItems(binding.viewPager.currentItem)
+    }
+
+    private fun setupTabs() {
+        binding.mainTabsHolder.removeAllTabs()
+        binding.mainTabsHolder.tabMode = if (getVisibleTabs().size > 3) TabLayout.MODE_SCROLLABLE else TabLayout.MODE_FIXED
+        getVisibleTabs().forEach { value ->
+            binding.mainTabsHolder.newTab().setText(getTabLabel(value)).apply {
+                binding.mainTabsHolder.addTab(this)
+            }
+        }
+
+        binding.mainTabsHolder.onTabSelectionChanged(
+            tabUnselectedAction = {},
+            tabSelectedAction = {
+                binding.viewPager.currentItem = it.position
+                updateLibraryHeader(getVisibleTabs()[it.position])
+                binding.viewPager.post {
+                    getAdapter()?.getFragmentAt(it.position)?.onSearchQueryChanged(
+                        text = binding.mainMenu.getCurrentQuery()
+                    )
+                }
+            }
+        )
+
+        binding.mainTabsHolder.beGoneIf(binding.mainTabsHolder.tabCount == 1)
+    }
+
+    private fun setupTabColors() {
+        val accent = getColor(R.color.tuno_accent)
+        val muted = getColor(R.color.tuno_muted)
+        binding.mainTabsHolder.tabIconTint = ColorStateList(
+            arrayOf(intArrayOf(android.R.attr.state_selected), intArrayOf()), intArrayOf(accent, muted)
+        )
+        binding.mainTabsHolder.setTabTextColors(muted, accent)
+        binding.mainTabsHolder.setSelectedTabIndicatorColor(accent)
+        binding.mainTabsHolder.setBackgroundResource(R.drawable.tuno_home_glass)
+    }
+
+    private fun getTabIcon(position: Int): Drawable {
+        val drawableId = when (position) {
+            TAB_PLAYLISTS -> R.drawable.ic_playlist_vector
+            TAB_FOLDERS -> R.drawable.ic_folders_vector
+            TAB_ARTISTS -> org.fossify.commons.R.drawable.ic_person_vector
+            TAB_ALBUMS -> R.drawable.ic_album_vector
+            TAB_GENRES -> R.drawable.ic_genre_vector
+            else -> R.drawable.ic_music_note_vector
+        }
+
+        return requireNotNull(androidx.appcompat.content.res.AppCompatResources.getDrawable(this, drawableId)).mutate()
+    }
+
+    private fun getTabLabel(position: Int): String {
+        val stringId = when (position) {
+            TAB_PLAYLISTS -> R.string.tuno_playlists
+            TAB_FOLDERS -> R.string.folders
+            TAB_ARTISTS -> R.string.artists
+            TAB_ALBUMS -> R.string.albums
+            TAB_GENRES -> R.string.genres
+            else -> R.string.tuno_music
+        }
+
+        return resources.getString(stringId)
+    }
+
+    private fun showSortingDialog() {
+        getCurrentFragment()?.onSortOpen(this)
+    }
+
+    private fun createNewPlaylist() {
+        NewPlaylistDialog(this) {
+            EventBus.getDefault().post(Events.PlaylistsUpdated())
+        }
+    }
+
+    private fun createPlaylistFromFolder() {
+        FilePickerDialog(this, pickFile = false, enforceStorageRestrictions = false) {
+            createPlaylistFrom(it)
+        }
+    }
+
+    private fun createPlaylistFrom(path: String) {
+        ensureBackgroundThread {
+            getFolderTracks(path, true) { tracks ->
+                runOnUiThread {
+                    NewPlaylistDialog(this) { playlistId ->
+                        tracks.forEach {
+                            it.playListId = playlistId
+                        }
+
+                        ensureBackgroundThread {
+                            audioHelper.insertTracks(tracks)
+                            EventBus.getDefault().post(Events.PlaylistsUpdated())
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, resultData: Intent?) {
+        super.onActivityResult(requestCode, resultCode, resultData)
+        if (requestCode == PICK_IMPORT_SOURCE_INTENT && resultCode == RESULT_OK && resultData?.data != null) {
+            tryImportPlaylistFromFile(resultData.data!!)
+        }
+    }
+
+    private fun tryImportPlaylistFromFile(uri: Uri) {
+        when {
+            uri.scheme == "file" -> showImportPlaylistDialog(uri.path!!)
+            uri.scheme == "content" -> {
+                val tempFile = getTempFile("imports", uri.path!!.getFilenameFromPath())
+                if (tempFile == null) {
+                    toast(org.fossify.commons.R.string.unknown_error_occurred)
+                    return
+                }
+
+                try {
+                    val inputStream = contentResolver.openInputStream(uri)
+                    val out = FileOutputStream(tempFile)
+                    inputStream!!.copyTo(out)
+
+                    showImportPlaylistDialog(tempFile.absolutePath)
+                } catch (e: Exception) {
+                    showErrorToast(e)
+                }
+            }
+
+            else -> toast(org.fossify.commons.R.string.invalid_file_format)
+        }
+    }
+
+    private fun tryImportPlaylist() {
+        if (isQPlus()) {
+            hideKeyboard()
+            Intent(Intent.ACTION_GET_CONTENT).apply {
+                addCategory(Intent.CATEGORY_OPENABLE)
+                type = MIME_TYPE_M3U
+
+                try {
+                    startActivityForResult(this, PICK_IMPORT_SOURCE_INTENT)
+                } catch (e: ActivityNotFoundException) {
+                    toast(org.fossify.commons.R.string.system_service_disabled, Toast.LENGTH_LONG)
+                } catch (e: Exception) {
+                    showErrorToast(e)
+                }
+            }
+        } else {
+            handlePermission(PERMISSION_READ_STORAGE) { granted ->
+                if (granted) {
+                    showFilePickerDialog()
+                }
+            }
+        }
+    }
+
+    private fun showFilePickerDialog() {
+        FilePickerDialog(this, enforceStorageRestrictions = false) { path ->
+            SelectPlaylistDialog(this) { id ->
+                importPlaylist(path, id)
+            }
+        }
+    }
+
+    private fun showImportPlaylistDialog(path: String) {
+        SelectPlaylistDialog(this) { id ->
+            importPlaylist(path, id)
+        }
+    }
+
+    private fun importPlaylist(path: String, id: Int) {
+        ensureBackgroundThread {
+            M3uImporter(this) { result ->
+                runOnUiThread {
+                    toast(
+                        when (result) {
+                            ImportResult.IMPORT_OK -> org.fossify.commons.R.string.importing_successful
+                            ImportResult.IMPORT_PARTIAL -> org.fossify.commons.R.string.importing_some_entries_failed
+                            else -> org.fossify.commons.R.string.importing_failed
+                        }
+                    )
+
+                    getAdapter()?.getPlaylistsFragment()?.setupFragment(this)
+                }
+            }.importPlaylist(path, id)
+        }
+    }
+
+    private fun showSleepTimer() {
+        val minutes = getString(org.fossify.commons.R.string.minutes_raw)
+        val hour = resources.getQuantityString(org.fossify.commons.R.plurals.hours, 1, 1)
+
+        val items = arrayListOf(
+            RadioItem(5 * 60, "5 $minutes"),
+            RadioItem(10 * 60, "10 $minutes"),
+            RadioItem(20 * 60, "20 $minutes"),
+            RadioItem(30 * 60, "30 $minutes"),
+            RadioItem(60 * 60, hour)
+        )
+
+        if (items.none { it.id == config.lastSleepTimerSeconds }) {
+            val lastSleepTimerMinutes = config.lastSleepTimerSeconds / 60
+            val text = resources.getQuantityString(org.fossify.commons.R.plurals.minutes, lastSleepTimerMinutes, lastSleepTimerMinutes)
+            items.add(RadioItem(config.lastSleepTimerSeconds, text))
+        }
+
+        items.sortBy { it.id }
+        items.add(RadioItem(-1, getString(org.fossify.commons.R.string.custom)))
+
+        GlassRadioGroupDialog(this, items, config.lastSleepTimerSeconds) {
+            if (it as Int == -1) {
+                SleepTimerCustomDialog(this) {
+                    if (it > 0) {
+                        pickedSleepTimer(it)
+                    }
+                }
+            } else if (it > 0) {
+                pickedSleepTimer(it)
+            }
+        }
+    }
+
+    private fun pickedSleepTimer(seconds: Int) {
+        config.lastSleepTimerSeconds = seconds
+        config.sleepInTS = System.currentTimeMillis() + seconds * 1000
+        startSleepTimer()
+    }
+
+    private fun startSleepTimer() {
+        binding.sleepTimerHolder.fadeIn()
+        withPlayer {
+            sendCommand(CustomCommands.TOGGLE_SLEEP_TIMER)
+        }
+    }
+
+    private fun stopSleepTimer() {
+        binding.sleepTimerHolder.fadeOut()
+        withPlayer {
+            sendCommand(CustomCommands.TOGGLE_SLEEP_TIMER)
+        }
+    }
+
+    private fun getAdapter() = binding.viewPager.adapter as? ViewPagerAdapter
+
+    private fun getAllFragments() = getAdapter()?.getAllFragments().orEmpty()
+
+    private fun getCurrentFragment() = getAdapter()?.getCurrentFragment()
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    fun sleepTimerChanged(event: Events.SleepTimerChanged) {
+        binding.sleepTimerValue.text = event.seconds.getFormattedDuration()
+        binding.sleepTimerHolder.beVisible()
+
+        if (event.seconds == 0) {
+            finish()
+        }
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    fun playlistsUpdated(event: Events.PlaylistsUpdated) {
+        getAdapter()?.getPlaylistsFragment()?.setupFragment(this)
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    fun tracksUpdated(event: Events.RefreshTracks) {
+        getAdapter()?.getTracksFragment()?.setupFragment(this)
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    fun shouldRefreshFragments(event: Events.RefreshFragments) {
+        refreshAllFragments()
+    }
+
+    private fun launchEqualizer() {
+        hideKeyboard()
+        startActivity(Intent(applicationContext, EqualizerActivity::class.java))
+    }
+
+    private fun launchSettings() {
+        hideKeyboard()
+        startActivity(Intent(applicationContext, SettingsActivity::class.java))
+    }
+
+    private fun launchAbout() {
+        val licenses = LICENSE_EVENT_BUS or LICENSE_GLIDE or LICENSE_M3U_PARSER or LICENSE_AUTOFITTEXTVIEW
+
+        val faqItems = arrayListOf(
+            FAQItem(R.string.faq_1_title, R.string.faq_1_text),
+            FAQItem(org.fossify.commons.R.string.faq_1_title_commons, org.fossify.commons.R.string.faq_1_text_commons),
+            FAQItem(org.fossify.commons.R.string.faq_4_title_commons, org.fossify.commons.R.string.faq_4_text_commons),
+            FAQItem(org.fossify.commons.R.string.faq_9_title_commons, org.fossify.commons.R.string.faq_9_text_commons)
+        )
+
+        if (!resources.getBoolean(org.fossify.commons.R.bool.hide_google_relations)) {
+            faqItems.add(FAQItem(org.fossify.commons.R.string.faq_2_title_commons, org.fossify.commons.R.string.faq_2_text_commons))
+            faqItems.add(FAQItem(org.fossify.commons.R.string.faq_6_title_commons, org.fossify.commons.R.string.faq_6_text_commons))
+        }
+
+        startAboutActivity(R.string.app_name, licenses, BuildConfig.VERSION_NAME, faqItems, true)
+    }
+
+    private fun checkWhatsNewDialog() {
+        arrayListOf<Release>().apply {
+            checkWhatsNew(this, BuildConfig.VERSION_CODE)
+        }
+    }
+
+    private fun handleNotificationIntent(intent: Intent) {
+        val shouldOpenPlayer = intent.getBooleanExtra(EXTRA_OPEN_PLAYER, false)
+
+        if (shouldOpenPlayer) {
+            intent.removeExtra(EXTRA_OPEN_PLAYER)
+            Intent(this, TrackActivity::class.java).apply {
+                startActivity(this)
+            }
+        }
+    }
+}

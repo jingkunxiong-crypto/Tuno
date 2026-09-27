@@ -1,0 +1,20 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="vertical" android:paddingHorizontal="20dp" android:paddingTop="16dp" android:paddingBottom="10dp" android:background="#8810151C" android:clickable="true">
+ <LinearLayout android:id="@+id/lyrics_header" android:layout_width="match_parent" android:layout_height="64dp" android:gravity="center_vertical">
+  <Space android:layout_width="64dp" android:layout_height="48dp" />
+  <LinearLayout android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:orientation="vertical">
+   <TextView android:id="@+id/lyrics_song" android:layout_width="match_parent" android:layout_height="wrap_content" android:textColor="#FFFFFF" android:textSize="16sp" android:maxLines="1" android:ellipsize="end" />
+   <TextView android:id="@+id/lyrics_artist" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="5dp" android:textColor="#99FFFFFF" android:textSize="12sp" android:maxLines="1" android:ellipsize="end" />
+  </LinearLayout>
+  <TextView android:id="@+id/lyrics_import" android:layout_width="56dp" android:layout_height="48dp" android:gravity="center" android:text="导入" android:textColor="#CCFFFFFF" android:textSize="13sp" android:contentDescription="导入歌词文件" />
+ </LinearLayout>
+ <FrameLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1">
+  <com.example.tuno.views.SyncedLyricsView android:id="@+id/fullscreen_lyrics" android:layout_width="match_parent" android:layout_height="match_parent" />
+  <TextView android:id="@+id/lyrics_message" android:layout_width="match_parent" android:layout_height="match_parent" android:gravity="center" android:textColor="#B3FFFFFF" android:textSize="16sp" android:text="正在读取歌词…" />
+ </FrameLayout>
+ <TextView android:id="@+id/lyrics_follow" android:layout_width="wrap_content" android:layout_height="36dp" android:layout_gravity="center" android:layout_marginBottom="8dp" android:paddingHorizontal="18dp" android:gravity="center" android:text="回到当前句" android:textSize="12sp" android:textColor="#FFFFFF" android:background="@drawable/tuno_time_pill" android:visibility="invisible" />
+ <LinearLayout android:layout_width="match_parent" android:layout_height="64dp" android:gravity="center_vertical" android:paddingHorizontal="12dp" android:background="@drawable/tuno_floating_glass">
+  <ImageView android:id="@+id/lyrics_mini_cover" android:layout_width="40dp" android:layout_height="40dp" android:scaleType="centerCrop" android:contentDescription="返回播放页" />
+  <TextView android:id="@+id/lyrics_mini_title" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:layout_marginHorizontal="12dp" android:textColor="#FFFFFF" android:textSize="14sp" android:maxLines="1" android:ellipsize="end" />
+  <ImageView android:id="@+id/lyrics_mini_play" android:layout_width="48dp" android:layout_height="48dp" android:padding="13dp" android:src="@drawable/tuno_wave_play" android:contentDescription="播放或暂停" />
+ </LinearLayout>
+</LinearLayout>

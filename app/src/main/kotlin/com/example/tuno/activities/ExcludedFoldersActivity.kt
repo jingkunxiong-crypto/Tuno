@@ -1,0 +1,44 @@
+package com.example.tuno.activities
+
+import android.os.Bundle
+import org.fossify.commons.extensions.beVisibleIf
+import org.fossify.commons.extensions.getProperTextColor
+import org.fossify.commons.extensions.viewBinding
+import org.fossify.commons.helpers.NavigationIcon
+import org.fossify.commons.interfaces.RefreshRecyclerViewListener
+import com.example.tuno.adapters.ExcludedFoldersAdapter
+import com.example.tuno.databinding.ActivityExcludedFoldersBinding
+import com.example.tuno.extensions.config
+
+class ExcludedFoldersActivity : SimpleActivity(), RefreshRecyclerViewListener {
+
+    private val binding by viewBinding(ActivityExcludedFoldersBinding::inflate)
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(binding.root)
+
+        setupEdgeToEdge(padBottomSystem = listOf(binding.excludedFoldersList))
+        updateFolders()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        setupTopAppBar(binding.excludedFoldersAppbar, NavigationIcon.Arrow)
+    }
+
+    private fun updateFolders() {
+        val folders = config.excludedFolders.toMutableList() as ArrayList<String>
+        binding.excludedFoldersPlaceholder.apply {
+            beVisibleIf(folders.isEmpty())
+            setTextColor(getProperTextColor())
+        }
+
+        val adapter = ExcludedFoldersAdapter(this, folders, this, binding.excludedFoldersList) {}
+        binding.excludedFoldersList.adapter = adapter
+    }
+
+    override fun refreshItems() {
+        updateFolders()
+    }
+}

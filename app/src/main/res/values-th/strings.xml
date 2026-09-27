@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <plurals name="albums_plural">
+        <item quantity="other">%d Album</item>
+    </plurals>
+    <plurals name="tracks_plural">
+        <item quantity="other">%d Track</item>
+    </plurals>
+    </resources>

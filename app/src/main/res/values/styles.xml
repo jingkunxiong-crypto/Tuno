@@ -1,0 +1,24 @@
+<resources>
+
+    <style name="AppTheme" parent="AppTheme.Base" />
+    <style name="TunoGlassPopupTheme" parent="ThemeOverlay.AppCompat.Dark">
+        <item name="android:popupBackground">@drawable/tuno_glass_popup</item>
+        <item name="popupMenuStyle">@style/TunoGlassPopupMenu</item>
+        <item name="actionOverflowMenuStyle">@style/TunoGlassPopupMenu</item>
+        <item name="android:textColorPrimary">#FFFFFF</item>
+        <item name="android:textColorSecondary">#BBFFFFFF</item>
+        <item name="colorControlNormal">#FFFFFF</item>
+    </style>
+    <style name="TunoGlassPopupMenu" parent="Widget.AppCompat.PopupMenu.Overflow">
+        <item name="android:popupBackground">@drawable/tuno_glass_popup</item>
+    </style>
+
+    <style name="CustomBottomSheetDialogTheme" parent="Theme.Design.Light.BottomSheetDialog">
+        <item name="bottomSheetStyle">@style/CustomBottomSheetStyle</item>
+    </style>
+
+    <style name="CustomBottomSheetStyle" parent="Widget.Design.BottomSheet.Modal">
+        <item name="android:background">@android:color/transparent</item>
+    </style>
+
+</resources>

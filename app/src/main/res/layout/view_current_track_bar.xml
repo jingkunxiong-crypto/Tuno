@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.example.tuno.views.CurrentTrackBar xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/current_track_bar"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:minHeight="104dp"
+    android:background="@drawable/tuno_player_card"
+    android:layout_alignParentBottom="true"
+    android:visibility="gone"
+    tools:visibility="visible">
+
+    <ImageView
+        android:id="@+id/current_track_divider"
+        android:visibility="gone"
+        android:layout_width="match_parent"
+        android:layout_height="1px"
+        android:background="@color/divider_grey"
+        android:importantForAccessibility="no" />
+
+    <ImageView
+        android:id="@+id/current_track_image"
+        android:layout_width="68dp"
+        android:layout_height="68dp"
+        android:layout_margin="18dp"
+        android:importantForAccessibility="no" />
+
+    <TextView
+        android:id="@+id/current_track_caption"
+        android:layout_width="wrap_content" android:layout_height="wrap_content"
+        android:layout_alignTop="@id/current_track_image"
+        android:layout_toEndOf="@id/current_track_image"
+        android:text="@string/tuno_now_playing" android:textColor="#B3FFFFFF"
+        android:textSize="10sp" />
+
+    <com.example.tuno.views.MarqueeTextView
+        android:id="@+id/current_track_label"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/current_track_caption"
+        android:layout_toStartOf="@+id/current_track_play_pause"
+        android:layout_toEndOf="@+id/current_track_image"
+        android:gravity="center_vertical"
+        android:paddingEnd="@dimen/activity_margin"
+        android:layout_marginTop="4dp"
+        android:fontFamily="sans-serif-medium"
+        android:maxLines="1"
+        android:textSize="17sp"
+        tools:text="My Track" />
+
+    <TextView
+        android:id="@+id/current_track_artist"
+        android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:layout_below="@id/current_track_label"
+        android:layout_toEndOf="@id/current_track_image"
+        android:layout_toStartOf="@id/current_track_play_pause"
+        android:layout_marginTop="4dp"
+        android:textColor="@color/tuno_muted" android:textSize="12sp"
+        android:maxLines="1" android:ellipsize="end" />
+
+    <com.airbnb.lottie.LottieAnimationView
+        android:id="@+id/current_track_play_pause"
+        android:layout_width="48dp"
+        android:layout_height="match_parent"
+        android:layout_alignTop="@+id/current_track_image"
+        android:layout_alignBottom="@+id/current_track_image"
+        android:layout_alignParentEnd="true"
+        android:layout_marginEnd="@dimen/normal_margin"
+        android:background="@null"
+        android:contentDescription="@string/playpause"
+        android:paddingStart="@dimen/smaller_margin"
+        android:paddingEnd="@dimen/smaller_margin"
+        android:scaleType="fitCenter"
+        app:lottie_autoPlay="false"
+        app:lottie_loop="false"
+        app:lottie_rawRes="@raw/playpause" />
+
+</com.example.tuno.views.CurrentTrackBar>

@@ -1,0 +1,128 @@
+package com.example.tuno.activities
+
+import android.content.Intent
+import android.os.Bundle
+import com.example.tuno.dialogs.GlassRadioGroupDialog
+import org.fossify.commons.extensions.*
+import org.fossify.commons.helpers.NavigationIcon
+import org.fossify.commons.helpers.isTiramisuPlus
+import org.fossify.commons.models.RadioItem
+import com.example.tuno.R
+import com.example.tuno.databinding.ActivitySettingsBinding
+import com.example.tuno.dialogs.ManageVisibleTabsDialog
+import com.example.tuno.extensions.config
+import com.example.tuno.extensions.sendCommand
+import com.example.tuno.helpers.SHOW_FILENAME_ALWAYS
+import com.example.tuno.helpers.SHOW_FILENAME_IF_UNAVAILABLE
+import com.example.tuno.helpers.SHOW_FILENAME_NEVER
+import com.example.tuno.playback.CustomCommands
+import java.util.Locale
+import kotlin.system.exitProcess
+
+class SettingsActivity : SimpleControllerActivity() {
+
+    private val binding by viewBinding(ActivitySettingsBinding::inflate)
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(binding.root)
+
+        setupEdgeToEdge(padBottomSystem = listOf(binding.settingsNestedScrollview))
+    }
+
+    override fun onResume() {
+        super.onResume()
+        setupTopAppBar(binding.settingsAppbar, NavigationIcon.Arrow)
+
+        setupUseEnglish()
+        setupLanguage()
+        setupManageExcludedFolders()
+        setupManageShownTabs()
+        setupSwapPrevNext()
+        setupReplaceTitle()
+        updateTextColors(binding.settingsNestedScrollview)
+
+        binding.settingsGeneralSettingsLabel.setTextColor(getProperPrimaryColor())
+        for (i in 0 until binding.settingsHolder.childCount) {
+            val row = binding.settingsHolder.getChildAt(i)
+            if (row is android.widget.RelativeLayout) {
+                row.setBackgroundResource(R.drawable.tuno_glass_row)
+                (row.layoutParams as? android.view.ViewGroup.MarginLayoutParams)?.let {
+                    it.bottomMargin = (10 * resources.displayMetrics.density).toInt()
+                    row.layoutParams = it
+                }
+            }
+        }
+    }
+
+    private fun setupUseEnglish() = binding.apply {
+        settingsUseEnglishHolder.beVisibleIf((config.wasUseEnglishToggled || Locale.getDefault().language != "en") && !isTiramisuPlus())
+        settingsUseEnglish.isChecked = config.useEnglish
+        settingsUseEnglishHolder.setOnClickListener {
+            settingsUseEnglish.toggle()
+            config.useEnglish = settingsUseEnglish.isChecked
+            exitProcess(0)
+        }
+    }
+
+    private fun setupLanguage() = binding.apply {
+        settingsLanguage.text = Locale.getDefault().displayLanguage
+        settingsLanguageHolder.beVisibleIf(isTiramisuPlus())
+        settingsLanguageHolder.setOnClickListener {
+            launchChangeAppLanguageIntent()
+        }
+    }
+
+    private fun setupSwapPrevNext() = binding.apply {
+        settingsSwapPrevNext.isChecked = config.swapPrevNext
+        settingsSwapPrevNextHolder.setOnClickListener {
+            settingsSwapPrevNext.toggle()
+            config.swapPrevNext = settingsSwapPrevNext.isChecked
+        }
+    }
+
+    private fun setupReplaceTitle() = binding.apply {
+        settingsShowFilename.text = getReplaceTitleText()
+        settingsShowFilenameHolder.setOnClickListener {
+            val items = arrayListOf(
+                RadioItem(SHOW_FILENAME_NEVER, getString(org.fossify.commons.R.string.never)),
+                RadioItem(SHOW_FILENAME_IF_UNAVAILABLE, getString(R.string.title_is_not_available)),
+                RadioItem(SHOW_FILENAME_ALWAYS, getString(org.fossify.commons.R.string.always))
+            )
+
+            GlassRadioGroupDialog(this@SettingsActivity, items, config.showFilename) {
+                config.showFilename = it as Int
+                settingsShowFilename.text = getReplaceTitleText()
+                refreshQueueAndTracks()
+            }
+        }
+    }
+
+    private fun getReplaceTitleText() = getString(
+        when (config.showFilename) {
+            SHOW_FILENAME_NEVER -> org.fossify.commons.R.string.never
+            SHOW_FILENAME_IF_UNAVAILABLE -> R.string.title_is_not_available
+            else -> org.fossify.commons.R.string.always
+        }
+    )
+
+    private fun setupManageShownTabs() = binding.apply {
+        settingsManageShownTabsHolder.setOnClickListener {
+            ManageVisibleTabsDialog(this@SettingsActivity) { result ->
+                val tabsMask = config.showTabs
+                if (tabsMask != result) {
+                    config.showTabs = result
+                    withPlayer {
+                        sendCommand(CustomCommands.RELOAD_CONTENT)
+                    }
+                }
+            }
+        }
+    }
+
+    private fun setupManageExcludedFolders() {
+        binding.settingsManageExcludedFoldersHolder.setOnClickListener {
+            startActivity(Intent(this, ExcludedFoldersActivity::class.java))
+        }
+    }
+}

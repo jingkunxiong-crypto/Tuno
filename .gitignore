@@ -1,0 +1,38 @@
+*.iml
+*.aab
+.gradle
+/local.properties
+/.idea/
+.DS_Store
+/build
+/captures
+keystore.jks
+keystore.properties
+fastlane/fastlane.json
+fastlane/report.xml
+.kotlin/
+
+# Local migration backups and verification outputs
+/.migration/
+
+# Windows/.NET build and packaging outputs
+windows/.packages/
+windows/.build-profile/
+windows/**/bin/
+windows/**/obj/
+windows/dist/
+windows/verification/
+.vs/
+*.user
+*.suo
+
+# Windows/.NET build and packaging outputs
+windows/.packages/
+windows/.build-profile/
+windows/**/bin/
+windows/**/obj/
+windows/dist/
+windows/verification/
+.vs/
+*.user
+*.suo
